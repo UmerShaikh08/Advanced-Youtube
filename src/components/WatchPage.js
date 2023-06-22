@@ -39,7 +39,7 @@ const WatchPage = () => {
           <iframe
             width="900"
             height="500"
-            src={`https://www.youtube.com/embed/${id}` + "?autoplay=0"}
+            src={`https://www.youtube.com/embed/${id}` + "?autoplay=1"}
             title="YouTube video player"
             frameBorder="0"
             autoPlay
