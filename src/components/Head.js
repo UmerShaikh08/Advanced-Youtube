@@ -48,8 +48,8 @@ const Head = () => {
   };
 
   return (
-    <div className="flex justify-between shadow-xl  ">
-      <div className="flex ">
+    <div className="flex justify-between shadow-xl  w-full">
+      <div className="flex  ">
         <img
           onClick={MenuBarHandler}
           className="h-12 mt-5 "
@@ -57,7 +57,7 @@ const Head = () => {
           src="https://cdn.iconscout.com/icon/premium/png-512-thumb/hamburger-menu-1821641-1545492.png?f=avif&w=256"
         ></img>
         <img
-          className="h-12 mt-5 "
+          className="h-12 mt-5 hidden sm:inline-block   "
           alt="youtube logo"
           src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQ6F9Cyvi4uEYUfbsfNHod5E-rnv-RXhCIgEA&usqp=CAU"
         ></img>
@@ -68,7 +68,7 @@ const Head = () => {
           <input
             onChange={searchHandler}
             value={SearchQuery}
-            className="border-slate-200 border-2 w-[37rem] h-10 rounded-s-2xl border-r-transparent mt-5 p-4 hover:border-gray-300"
+            className="border-slate-200 border-2 lg:w-[37rem] w-[15rem] h-10 rounded-s-2xl border-r-transparent mt-5 p-4 hover:border-gray-300"
             placeholder="Search"
             onFocus={() => setSuggestShow(true)}
             // onBlur={() => setSuggestShow(false)}
@@ -82,7 +82,7 @@ const Head = () => {
         </div>
         {suggestShow && (
           <ul
-            className="absolute fixed bg-white w-[37rem] rounded-lg shadow-2xl border-gray-200 mt-3"
+            className="absolute fixed bg-white lg:w-[37rem] w-[15rem] rounded-lg shadow-2xl border-gray-200 mt-3"
             onFocus={() => setSuggestShow(true)}
             onBlur={() => setSuggestShow(false)}
           >
@@ -91,12 +91,12 @@ const Head = () => {
                 <NavLink
                   key={idx}
                   to={"/search/" + searchname}
-                  onClick={() => {
-                    setSearchName(data);
-                    setSearchQuery(data);
+                  onClick={async () => {
+                    await setSearchName(data);
+                    await setSearchQuery(data);
                   }}
                 >
-                  <li className="flex font-bold mt-3 p-1 hover:bg-gray-100">
+                  <li className="flex font-bold mt-3 p-1  hover:bg-gray-100">
                     <img src={searchLogo} className="w-5 h-4 mt-2 mr-2" />
                     {data}
                   </li>

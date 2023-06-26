@@ -6,31 +6,30 @@ const Sidebar = () => {
   const isMenu = useSelector((store) => store.app.isMenu);
 
   return !isMenu ? null : (
-    <div className="shadow-xl w-48 ">
-      <ul>
+    <div className="shadow-xl   ">
+      <ul className="m-2 p-3">
         <Link to="/">
-          {" "}
-          <li>Home</li>
+          <li className="mt-2">Home</li>
         </Link>
-        <li>Short</li>
-        <li>Subscription</li>
-        <li>Live</li>
+        <li className="mt-2">Short</li>
+        <li className="mt-2">Subscription</li>
+        <li className="mt-2">Live</li>
       </ul>
 
       <h1 className="font-bold mt-5">Subscription</h1>
-      <ul>
-        <li>Music</li>
-        <li>Sports</li>
-        <li>Gaming</li>
-        <li>Movies</li>
+      <ul className="ml-3">
+        <li className="mt-2">Music</li>
+        <li className="mt-2">Sports</li>
+        <li className="mt-2">Gaming</li>
+        <li className="mt-2">Movies</li>
       </ul>
 
       <h1 className="font-bold mt-5">Watch Later</h1>
-      <ul>
-        <li>Music</li>
-        <li>Sports</li>
-        <li>Gaming</li>
-        <li>Movies</li>
+      <ul className=" ml-3">
+        <li className="mt-2">Music</li>
+        <li className="mt-2">Sports</li>
+        <li className="mt-2">Gaming</li>
+        <li className="mt-2">Movies</li>
       </ul>
     </div>
   );

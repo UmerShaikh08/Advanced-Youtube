@@ -10,7 +10,7 @@ const VideoContainer = () => {
   return !videolist ? (
     <ContainerShimmer />
   ) : (
-    <div className="flex flex-wrap">
+    <div className="flex flex-wrap justify-center">
       {videolist.map((card) => {
         return (
           <Link to={"/watch/" + card.id} key={card.id}>

@@ -15,7 +15,7 @@ const ButtonList = () => {
   ];
 
   return (
-    <div>
+    <div className="flex justify-center flex-wrap">
       {Button_list.map((name) => {
         return <Button name={name} key={name} />;
       })}

@@ -43,7 +43,7 @@ function App() {
   // ]);
   return (
     <Provider store={store}>
-      <div className="App">
+      <div className="App w-full h-full box-border m-0 p-0 overflow-x-hidden">
         <Head />
         <Routes>
           <Route path="/" element=<Body />>
