@@ -12,8 +12,11 @@ const Head = () => {
   const [suggestion, setSuggestion] = useState([]);
   const [suggestShow, setSuggestShow] = useState(true);
   const [searchname, setSearchName] = useState("");
+  const [inputFocused, setInputFocused] = useState(false);
 
+  const navigate = useNavigate();
   const dispatch = useDispatch();
+
   const MenuBarHandler = () => {
     dispatch(toggleMenu());
   };
@@ -87,20 +90,21 @@ const Head = () => {
             onBlur={() => setSuggestShow(false)}
           >
             {suggestion.map((data, idx) => {
+              const handleClick = async () => {
+                await setSearchName(data);
+                await setSearchQuery(data);
+                navigate(`/search/${data}`);
+              };
               return (
-                <NavLink
+                <li
+                  className="flex font-bold mt-3 p-1  hover:bg-gray-100 cursor-pointer"
                   key={idx}
-                  to={"/search/" + searchname}
-                  onClick={async () => {
-                    await setSearchName(data);
-                    await setSearchQuery(data);
-                  }}
+                  // to={"/search/" + searchname}
+                  onClick={handleClick}
                 >
-                  <li className="flex font-bold mt-3 p-1  hover:bg-gray-100">
-                    <img src={searchLogo} className="w-5 h-4 mt-2 mr-2" />
-                    {data}
-                  </li>
-                </NavLink>
+                  <img src={searchLogo} className="w-5 h-4 mt-2 mr-2" />
+                  {data}
+                </li>
               );
             })}
           </ul>
