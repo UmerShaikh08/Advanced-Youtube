@@ -10,9 +10,6 @@ const Head = () => {
   const [SearchQuery, setSearchQuery] = useState("");
   const SearchCache = useSelector((store) => store.search);
   const [suggestion, setSuggestion] = useState([]);
-  const [suggestShow, setSuggestShow] = useState(true);
-  const [searchname, setSearchName] = useState("");
-  const [inputFocused, setInputFocused] = useState(false);
 
   const navigate = useNavigate();
   const dispatch = useDispatch();
@@ -66,15 +63,13 @@ const Head = () => {
         ></img>
       </div>
 
-      <div>
+      <div className="group">
         <div className="flex justify-center align-middle relative ">
           <input
             onChange={searchHandler}
             value={SearchQuery}
-            className="border-slate-200 border-2 lg:w-[37rem] w-[15rem] h-10 rounded-s-2xl border-r-transparent mt-5 p-4 hover:border-gray-300"
+            className="group border-slate-200 border-2 lg:w-[37rem] w-[15rem] h-10 rounded-s-2xl border-r-transparent mt-5 p-4 hover:border-gray-300"
             placeholder="Search"
-            onFocus={() => setSuggestShow(true)}
-            // onBlur={() => setSuggestShow(false)}
           ></input>
           <button className="border-blackborder-slate-200 w-16 h-10 border-2 rounded-r-2xl mt-5 grid place-content-center ">
             <img
@@ -83,32 +78,26 @@ const Head = () => {
             ></img>
           </button>
         </div>
-        {suggestShow && (
-          <ul
-            className="absolute fixed bg-white lg:w-[37rem] w-[15rem] rounded-lg shadow-2xl border-gray-200 mt-3"
-            onFocus={() => setSuggestShow(true)}
-            onBlur={() => setSuggestShow(false)}
-          >
-            {suggestion.map((data, idx) => {
-              const handleClick = async () => {
-                await setSearchName(data);
-                await setSearchQuery(data);
-                navigate(`/search/${data}`);
-              };
-              return (
-                <li
-                  className="flex font-bold mt-3 p-1  hover:bg-gray-100 cursor-pointer"
-                  key={idx}
-                  // to={"/search/" + searchname}
-                  onClick={handleClick}
-                >
-                  <img src={searchLogo} className="w-5 h-4 mt-2 mr-2" />
-                  {data}
-                </li>
-              );
-            })}
-          </ul>
-        )}
+
+        <ul className="absolute fixed invisible group-hover:visible bg-white lg:w-[37rem] w-[15rem] rounded-lg shadow-2xl border-gray-200 mt-3">
+          {suggestion.map((data, idx) => {
+            const handleClick = async () => {
+              await setSearchQuery(data);
+              navigate(`/search/${data}`);
+            };
+            return (
+              <li
+                className="flex font-bold mt-3 p-1  hover:bg-gray-100 cursor-pointer"
+                key={idx}
+                // to={"/search/" + searchname}
+                onClick={handleClick}
+              >
+                <img src={searchLogo} className="w-5 h-4 mt-2 mr-2" />
+                {data}
+              </li>
+            );
+          })}
+        </ul>
       </div>
 
       <div>
