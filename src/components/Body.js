@@ -5,9 +5,12 @@ import { Outlet } from "react-router-dom";
 
 const Body = () => {
   return (
-    <div className="flex w-full">
+    <div className="relative flex md:h-[calc(100vh-5rem)] overflow-auto">
       <Sidebar />
-      <Outlet />
+
+      <div className="overflow-auto">
+        <Outlet />
+      </div>
     </div>
   );
 };

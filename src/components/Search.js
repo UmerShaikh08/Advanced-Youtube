@@ -2,9 +2,12 @@ import React from "react";
 
 const Search = ({ id, snippet }) => {
   return id?.kind === "youtube#video" ? (
-    <div className="flex m-4">
+    <div className="flex  flex-col md:flex-row gap-3 m-4 ">
       <div className="w-[21rem]">
-        <img src={snippet?.thumbnails?.medium?.url} className="h rounded-lg " />
+        <img
+          src={snippet?.thumbnails?.medium?.url}
+          className="h rounded-lg min-w-[250px] md:min-w-[350px]"
+        />
       </div>
       <div className="ml-3 mr-14">
         <h1 className="font-normal text-xl tracking-wider">{snippet?.title}</h1>
@@ -16,7 +19,7 @@ const Search = ({ id, snippet }) => {
           />
           <p className="p-1 text-gray-500 text-sm">{snippet?.channelTitle}</p>
         </div>
-        <p className="text-gray-500 text-sm">
+        <p className="text-gray-500 text-sm hidden md:block">
           {(snippet?.description).substring(0, 100)}...
         </p>
       </div>

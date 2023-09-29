@@ -8,6 +8,7 @@ const useVideolist = () => {
     const data = await fetch(YOUTUBE_API_URL);
     const json = await data.json();
     setVideoList(json.items);
+    console.log(json);
   };
 
   useEffect(() => {
