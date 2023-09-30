@@ -5,11 +5,14 @@ import { Link } from "react-router-dom";
 import useVideolist from "../utils/useVideolist";
 import { ContainerShimmer } from "./shimmer/ContainerShimmer";
 import { useSelector } from "react-redux";
-
+import InfiniteScroll from "react-infinite-scroller";
+import Skeleton, { SkeletonTheme } from "react-loading-skeleton";
+import "react-loading-skeleton/dist/skeleton.css";
 const VideoContainer = () => {
   const isMenu = useSelector((store) => store.app.isMenu);
   const [videolist, setVideoList] = useState();
   const [nextPageToken, setNextPageToken] = useState("");
+  const [data, setData] = useState(null);
 
   const getVideos = async () => {
     const data = await fetch(
@@ -17,39 +20,54 @@ const VideoContainer = () => {
         API_KEY
     );
     const json = await data.json();
-    setVideoList(json.items);
+    setVideoList((prev) => (prev ? [...prev, ...json.items] : json.items));
+
+    setVideoList((prev) => (prev ? [...prev, ...json.items] : json.items));
+    if (json?.nextPageToken) {
+      setNextPageToken(json?.nextPageToken);
+    }
+
+    setData(json);
+
     console.log(json);
   };
 
   useEffect(() => {
-    getVideos();
-  }, [nextPageToken]);
-
-  useEffect(() => {
-    if (
-      window.innerHeight + document.documentElement.scrollHeight + 1 >=
-      document.documentElement.scrollHeight
-    ) {
-      setNextPageToken();
-    }
+    setTimeout(() => {
+      getVideos();
+    }, 5000);
   }, []);
 
   return !videolist ? (
     <ContainerShimmer />
   ) : (
-    <div
-      className={`grid grid-cols-1 sm:grid-cols-2  ${
-        isMenu ? "lg:grid-cols-3" : "lg:grid-cols-4"
-      } gap-8 mx-auto mt-4`}
+    <InfiniteScroll
+      pageStart={nextPageToken}
+      loadMore={getVideos}
+      hasMore={true || false}
+      loader={
+        <div className="loader" key={0}>
+          Loading ...
+        </div>
+      }
+      useWindow={true}
     >
-      {videolist.map((card) => {
-        return (
-          <Link to={"/watch/" + card.id} key={card.id}>
-            <VideoCard {...card} />
-          </Link>
-        );
-      })}
-    </div>
+      <div
+        className={`grid grid-cols-1 sm:grid-cols-2 h-full ${
+          isMenu ? "lg:grid-cols-3" : "lg:grid-cols-4"
+        } gap-8 mx-auto mt-4  overflow-x-hidden`}
+      >
+        {videolist.map((card) => {
+          return (
+            <Link to={"/watch/" + card.id} key={card.id}>
+              <div className="  mx-auto rounded-md  space-y-2  duration-200 md:hover:scale-105 ">
+                <VideoCard {...card} />
+              </div>
+            </Link>
+          );
+        })}
+      </div>
+    </InfiniteScroll>
   );
 };
 

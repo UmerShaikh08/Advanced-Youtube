@@ -49,7 +49,7 @@ const VideoCard = ({ contentDetails, snippet, statistics }) => {
   });
 
   return (
-    <div className="  mx-auto rounded-md  space-y-2  duration-200 md:hover:scale-105 ">
+    <>
       <img
         className="rounded-md  w-full bg-cover object-cover"
         src={thumbnails.medium.url}
@@ -73,7 +73,7 @@ const VideoCard = ({ contentDetails, snippet, statistics }) => {
         </p>
         <div>{formatDate(snippet?.publishedAt)}</div>
       </div>
-    </div>
+    </>
   );
 };
 

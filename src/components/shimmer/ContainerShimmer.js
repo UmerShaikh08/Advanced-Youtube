@@ -3,7 +3,7 @@ import { ContainerCard } from "./ContainerCard";
 
 export const ContainerShimmer = () => {
   return (
-    <div className="flex flex-wrap">
+    <div className="grid grid-cols-4 w-full">
       <ContainerCard />
       <ContainerCard />
       <ContainerCard />

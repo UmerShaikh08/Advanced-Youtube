@@ -8,11 +8,11 @@ const Sidebar = () => {
 
   return !isMenu ? null : (
     <div
-      className={`w-[200px] fixed flex z-30 h-[calc(100vh-1rem)] transition-transform duration-500 bg-white ease-in-out flex-row gap-2  ${
+      className={`w-[200px]  fixed flex z-30 h-screen transition-transform duration-500 bg-white ease-in-out flex-row gap-2  ${
         isMenu ? "translate-x-[0px]" : "translate-x-[-220px]"
       } `}
     >
-      <div className="  ">
+      <div className=" mt-10 mx-auto">
         <ul className="m-2 p-3">
           <Link to="/">
             <li className="mt-2">Home</li>

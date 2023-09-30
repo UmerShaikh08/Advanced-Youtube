@@ -11,7 +11,7 @@ import MainContainer from "./components/MainContainer";
 function App() {
   return (
     <Provider store={store}>
-      <div className="App w-full h-full box-border m-0 p-0 ">
+      <div className="App relative w-full h-full box-border m-0 p-0 ">
         <Head />
         <Routes>
           <Route path="/" element=<Body />>

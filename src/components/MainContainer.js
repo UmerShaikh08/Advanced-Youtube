@@ -7,9 +7,9 @@ const MainContainer = () => {
   const isMenu = useSelector((store) => store.app.isMenu);
 
   return (
-    <div className=" flex flex-row mx-auto">
-      {isMenu && <div className="hidden lg:block w-[200px]"></div>}
-      <div className="w-11/12 mx-auto">
+    <div className=" flex flex-row mx-auto  ">
+      {isMenu && <div className="hidden lg:block w-[220px]"></div>}
+      <div className="w-11/12 mx-auto ">
         <ButtonList />
         <VideoContainer />
       </div>
