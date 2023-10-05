@@ -3,21 +3,29 @@ import { useParams } from "react-router-dom";
 import Search from "./Search";
 import { Link } from "react-router-dom";
 import SearchShimmer from "./shimmer/SearchShimmer";
+import { API_KEY } from "../utils/constants";
+import InfiniteScroll from "react-infinite-scroller";
 
 const SearchPage = () => {
   const { id } = useParams();
   const [searchVideos, setSearchVideos] = useState([]);
+  const [nextPageToken, setNextPageToken] = useState("");
 
   const getVideos = async () => {
-    let data = null;
-
     try {
-      data = await fetch(
-        `https://youtube.googleapis.com/youtube/v3/search?part=snippet&maxResults=25&q=${id}&key=AIzaSyDxVXObkzSu9WSwil2XIIqm4hZKvkRNVKU`
+      const data = await fetch(
+        `https://youtube.googleapis.com/youtube/v3/search?part=snippet&contentDetails&maxResults=25&q=${id}&key=${API_KEY}&brandingSettings`
       );
       const json = await data.json();
-      setSearchVideos(json?.items);
-      console.log(json?.items);
+      console.log("json", json);
+      if (!json?.error) {
+        setSearchVideos((prev) =>
+          prev ? [...prev, ...json?.items] : json?.items
+        );
+      }
+      if (json?.nextPageToken) {
+        setNextPageToken(json?.nextPageToken);
+      }
     } catch (error) {
       console.log("Failed to display video --->", error);
     }
@@ -26,21 +34,32 @@ const SearchPage = () => {
     getVideos();
   }, [id]);
 
-  return searchVideos.length === 0 ? (
+  return searchVideos?.length === 0 ? (
     <SearchShimmer />
   ) : (
-    <div>
-      {searchVideos.map((video, idx) => {
-        return (
-          <Link
-            to={"/watch/" + video?.id?.videoId}
-            key={video?.snippet?.id || idx}
-          >
-            <Search {...video} />
-          </Link>
-        );
-      })}
-    </div>
+    <InfiniteScroll
+      pageStart={nextPageToken}
+      loadMore={getVideos}
+      hasMore={true || false}
+      loader={
+        <div className="loader w-full" key={0}>
+          <SearchShimmer />
+        </div>
+      }
+    >
+      <div className="grid grid-cols-1 gap-4 md:w-11/12 mx-auto ">
+        {searchVideos?.map((video, idx) => {
+          return (
+            <Link
+              to={"/watch/" + video?.id?.videoId}
+              key={video?.snippet?.id || idx}
+            >
+              <Search {...video} />
+            </Link>
+          );
+        })}
+      </div>
+    </InfiniteScroll>
   );
 };
 

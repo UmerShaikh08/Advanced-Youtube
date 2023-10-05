@@ -4,15 +4,15 @@ import VideoCard from "./VideoCard";
 import { Link } from "react-router-dom";
 import useVideolist from "../utils/useVideolist";
 import { ContainerShimmer } from "./shimmer/ContainerShimmer";
-import { useSelector } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import InfiniteScroll from "react-infinite-scroller";
-import Skeleton, { SkeletonTheme } from "react-loading-skeleton";
-import "react-loading-skeleton/dist/skeleton.css";
+
 const VideoContainer = () => {
   const isMenu = useSelector((store) => store.app.isMenu);
   const [videolist, setVideoList] = useState();
   const [nextPageToken, setNextPageToken] = useState("");
   const [data, setData] = useState(null);
+  const dispatch = useDispatch();
 
   const getVideos = async () => {
     const data = await fetch(
@@ -22,7 +22,6 @@ const VideoContainer = () => {
     const json = await data.json();
     setVideoList((prev) => (prev ? [...prev, ...json.items] : json.items));
 
-    setVideoList((prev) => (prev ? [...prev, ...json.items] : json.items));
     if (json?.nextPageToken) {
       setNextPageToken(json?.nextPageToken);
     }
@@ -33,9 +32,7 @@ const VideoContainer = () => {
   };
 
   useEffect(() => {
-    setTimeout(() => {
-      getVideos();
-    }, 5000);
+    getVideos();
   }, []);
 
   return !videolist ? (
@@ -48,19 +45,19 @@ const VideoContainer = () => {
       loader={
         <div className="loader" key={0}>
           Loading ...
+          <ContainerShimmer />
         </div>
       }
-      useWindow={true}
     >
       <div
-        className={`grid grid-cols-1 sm:grid-cols-2 h-full ${
+        className={` grid grid-cols-1 sm:grid-cols-2 h-full ${
           isMenu ? "lg:grid-cols-3" : "lg:grid-cols-4"
         } gap-8 mx-auto mt-4  overflow-x-hidden`}
       >
-        {videolist.map((card) => {
+        {videolist.map((card, idx) => {
           return (
-            <Link to={"/watch/" + card.id} key={card.id}>
-              <div className="  mx-auto rounded-md  space-y-2  duration-200 md:hover:scale-105 ">
+            <Link to={"/watch/" + card.id} key={idx}>
+              <div className="  mx-auto rounded-md  space-y-2 mt-6  duration-200 md:hover:scale-105 ">
                 <VideoCard {...card} />
               </div>
             </Link>

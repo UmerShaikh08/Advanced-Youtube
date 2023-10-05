@@ -1,4 +1,5 @@
-export const API_KEY = "AIzaSyDxVXObkzSu9WSwil2XIIqm4hZKvkRNVKU";
+export const API_KEY = "AIzaSyBmlkGSTzrKYwU1_tr2qayw-32OkJS66Jc";
+
 export const YOUTUBE_API_URL =
   `https://youtube.googleapis.com/youtube/v3/videos?part=snippet%2CcontentDetails%2Cstatistics&chart=mostPopular&maxResults=50&pageToken=&regionCode=US&key=` +
   API_KEY;

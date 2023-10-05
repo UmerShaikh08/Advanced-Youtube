@@ -1,9 +1,15 @@
 import React from "react";
 import { ContainerCard } from "./ContainerCard";
+import { useSelector } from "react-redux";
 
 export const ContainerShimmer = () => {
+  const isMenu = useSelector((store) => store.app.isMenu);
+
   return (
-    <div className="grid grid-cols-4 w-full">
+    <div className={`flex flex-wrap gap-5 `}>
+      <ContainerCard />
+      <ContainerCard />
+      <ContainerCard />
       <ContainerCard />
       <ContainerCard />
       <ContainerCard />

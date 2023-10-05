@@ -3,7 +3,7 @@ import { createSlice } from "@reduxjs/toolkit";
 const appSlice = createSlice({
   name: "app",
   initialState: {
-    isMenu: false,
+    isMenu: true,
     videoList: [],
   },
   reducers: {

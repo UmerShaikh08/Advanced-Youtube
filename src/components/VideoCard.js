@@ -51,8 +51,14 @@ const VideoCard = ({ contentDetails, snippet, statistics }) => {
   return (
     <>
       <img
-        className="rounded-md  w-full bg-cover object-cover"
-        src={thumbnails.medium.url}
+        className="rounded-md  w-full bg-cover object-cover max-h-[250px]"
+        src={
+          thumbnails?.maxres?.url
+            ? thumbnails?.maxres?.url
+            : thumbnails?.high?.url
+            ? thumbnails?.high?.url
+            : thumbnails?.medium?.url
+        }
       />
       <h1 className=" text-sm md:text-[16px] font-bold mb-1 w-[80%]">
         {title.substring(0, 50) + "..."}

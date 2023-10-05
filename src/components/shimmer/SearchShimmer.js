@@ -3,7 +3,7 @@ import SearchShimmerCard from "./SearchShimmerCard";
 
 const SearchShimmer = () => {
   return (
-    <div>
+    <div className="flex flex-col gap-6 w-11/12 mx-auto">
       <SearchShimmerCard />
       <SearchShimmerCard />
       <SearchShimmerCard />

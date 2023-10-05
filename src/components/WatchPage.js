@@ -1,11 +1,22 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { closeMenu } from "../utils/appSlice";
 import { useDispatch } from "react-redux";
 import { useSearchParams, useParams } from "react-router-dom";
-import useVideolist from "../utils/useVideolist";
-import CommentContainer from "./CommentContainer";
-import WatchShimmer from "./shimmer/WatchShimmer";
-import LiveChat from "./LiveChat";
+
+import { BiDislike, BiLike } from "react-icons/bi";
+import { IoMdShareAlt } from "react-icons/io";
+import { LiaDownloadSolid } from "react-icons/lia";
+import { HiDotsHorizontal } from "react-icons/hi";
+import { MdSort } from "react-icons/md";
+
+import "video-react/dist/video-react.css";
+import { Player } from "video-react";
+import ReactPlayer from "react-player";
+import { formatNumber } from "../utils/formatNumber";
+import Comments from "./Video/Comments";
+import InfiniteScroll from "react-infinite-scroller";
+import { PiThumbsUpThin, PiThumbsDownThin } from "react-icons/pi";
+import Loader from "./shimmer/Loader";
 
 const WatchPage = () => {
   const dispatch = useDispatch();
@@ -13,8 +24,17 @@ const WatchPage = () => {
     dispatch(closeMenu());
   }, []);
 
+  const VideoPlayerRef = useRef(null);
+
   const { id } = useParams();
-  const [video, setVideo] = useState({});
+
+  const [video, setVideo] = useState(null);
+  const [statistics, setStatistics] = useState(null);
+  const [snippet, setSnippet] = useState(null);
+  const [showDiscription, setShowDiscription] = useState(false);
+  const [commentsList, setCommentsList] = useState(null);
+  const [commentsData, setcommentsData] = useState(null);
+  const [commentNextPageToken, setCommentNextPageToken] = useState(null);
 
   const getVideos = async () => {
     const data = await fetch(
@@ -22,73 +42,226 @@ const WatchPage = () => {
     );
     const json = await data.json();
     setVideo(json?.items[0]);
+
+    if (json.items[0]?.snippet) {
+      setSnippet(json.items[0]?.snippet);
+    }
+
+    if (json.items[0]?.statistics) {
+      setStatistics(json.items[0]?.statistics);
+    }
   };
 
   useEffect(() => {
     getVideos();
   }, []);
 
-  const { snippet, statistics } = video;
+  // fetching comments api data
+  // comments are infinite after some comments its fetching random commentsr
+  const fetchComment = async () => {
+    const data = await fetch(
+      `https://youtube.googleapis.com/youtube/v3/commentThreads?part=snippet%2Creplies&order=relevance&pageToken=${commentNextPageToken}&videoId=_VB39Jo8mAQ&key=${process.env.REACT_APP_KEY}`
+    );
+    const json = await data?.json();
 
-  return video.length === 0 ? (
-    <WatchShimmer />
-  ) : (
-    <div className="flex flex-col w-full">
-      <div className="flex w-full">
-        <div className="m-5">
-          <iframe
-            width="900"
-            height="500"
-            src={`https://www.youtube.com/embed/${id}` + "?autoplay=1"}
-            title="YouTube video player"
-            frameBorder="0"
-            autoPlay
-            muted
-            allow="accelerometer; autoplay;  clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-            allowFullScreen
-          ></iframe>
+    if (json) setcommentsData(json);
 
-          <h1 className="font-medium text-lg mt-2">{snippet?.title}</h1>
-          <p>{statistics?.viewCount} Views</p>
+    if (json?.items) {
+      setCommentsList((prev) =>
+        prev ? [...prev, ...json?.items] : json?.items
+      );
+    }
 
-          <div className="flex justify-between my-2">
-            <div className="flex">
+    if (json?.nextPageToken) {
+      setCommentNextPageToken(json?.nextPageToken);
+    } else {
+      setCommentNextPageToken(null);
+    }
+
+    console.log(json);
+  };
+
+  useEffect(() => {
+    const firstFetchComment = async () => {
+      const data = await fetch(
+        `https://youtube.googleapis.com/youtube/v3/commentThreads?part=snippet%2Creplies&order=relevance&videoId=${id}&key=${process.env.REACT_APP_KEY}`
+      );
+      const json = await data?.json();
+
+      if (json) setcommentsData(json);
+
+      if (json?.items) {
+        setCommentsList(json?.items);
+      }
+
+      if (json?.nextPageToken) {
+        setCommentNextPageToken(json?.nextPageToken);
+      }
+
+      console.log(json);
+    };
+    firstFetchComment();
+  }, []);
+
+  return video ? (
+    <div className="grid grid-cols-1 lg:grid-cols-3 w-screen sm:w-11/12 overflow-hidden mx-auto">
+      <div className="col-span-2 aspect-video rounded-lg space-y-4 ">
+        <ReactPlayer
+          controls={true}
+          width="100%"
+          height="100%"
+          config={{
+            youtube: {
+              playerVars: { showinfo: 1 },
+            },
+          }}
+          url={`https://www.youtube.com/watch?v=${id}`}
+        />
+
+        {/* video title  */}
+        <div className="space-y-2 mx-2 sm:mx-0">
+          <h1 className="font-semibold text-xl">{snippet?.title}</h1>
+          <div className="flex flex-col gap-3 md:flex-row justify-between ">
+            {/* title and channel logo , name */}
+            <div className="flex flex-row gap-1">
               <img
-                className="h-12 "
+                className="h-10   rounded-full w-fit "
                 alt="channel logo"
-                src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAH4AAAB+CAMAAADV/VW6AAAAY1BMVEX///8AAADV1dWLi4v4+PgbGxv8/PzDw8Pe3t6xsbFnZ2dFRUXj4+Pq6urn5+d9fX2qqqpOTk4jIyOTk5O7u7uioqJeXl4TExM8PDycnJxWVlZvb2/KysozMzN2dnbx8fErKyun6xAFAAAE3klEQVRoge1b2ZKqMBSUVXZRFEcE8f+/8so4jiE5STohjnWr7PfQkJy1c1itPvjgg/8G4Vgm/np/w9pPyjH8Q+okDbI88hhEeRakyR9Q+4fWk6I9+C+kjv0gknP/7EPgxy8hH+utjvuObT06Jy+CHUY+YRcUTsnLC859x6V0Rl5tTMknbCon5GFztGH3vGPjIBr4X3bkE76W+mF8siefcFrkhWW3jN3zugUmuF5KPmFty35wwe55ByvyOHDD7nmBhQHEZ1fsnnc2519sdCw60293yn7jN/p+lzt/h9H+O7O6JwKc3ZHHzQH7n5NoIwKMP+Vr2D0Pir+ujf4JyPwX5jgVTnp2/3XsnqfN/+GC6kKPL1390xg8LMrbG3Jt7c+gUbNXcF2XN331Xc+PVd/k6Kqjuv5Ea9qsn6/rM3DhRsUOunxLdBGFovdjoXJ+rJtI6cUptPgiZy+Q9Vep9/hXZL28/0IS3aDwXX8AHiBNfSPQRR6VIkICOM5O1v/WwLtr4hYSM2t6aQz075qwAYWtLZ15gDcftDkrBo6f3kHA8CQuxwJwP9r49LH7C0jYsT5nRdQ6YO+BfA3VC9TuA8sgxQaIXdRn6GP2FlIrQr0DtcQy/Usrs9UTQNYUFyX6RZJ4wQOIXmLoBBymJ7gI9PoniQ4MeD2oGQP7KHo+UK6AQl2lf1LGrwmBcs3d1+e8D41Averu7CM+6SJVHhDxJyBFF1/xATuGtuhIzcSfI1IntJBCESMlLx/1kZ5e0yP8AOpU+F5/D6zBBApIGtnb0OdIvocaLit6RB/BlBk7+lxPj3WbPD0oJ2lPHxTF+G1ERQ1N4EXCxwTe8dB1g9L5KqTLor4CVtO2ijvCEbxoFIMuknLuyKUdegmLHELKQRLuAxL3MxBDhYSLlBu/2BAbUJrcNQrlhpmIPTScBVYNanTfEHMnJo08cU5/36BKTeV/sXJAPY/Brr0EwaU1uNp+gIge5g+xB2G4oDDmAlSTBUbr6HqV1BPH6xUMHlTmgKL+pi/GMkmJ6Latk3Isesj9SHlD/+pPf084ms2vMQH+T8oLWs/PZu193J/OXT4MeXc+9bMqqNBFMLpiVu/+lajyw3AcQ6LpT9XyJi0tKYW1zmgWpVDdB0mENVVjbnoJrbr+lskEclEVbK9YSIO4VFSVGd/RagBhLQkP8lZNIkpZjj9I8r/CiMjrBL4ohkEW74rrBLLiszj3B6jzV96kiiFLq2GrIOrbanFOaE+p5GQAPo3qmmTufdVlvR584a/bS+4S1Xrm54G5+WsvUeeRX2WmIGbOBIyQMcr2zsHMX8mEUkSQZ8YHxG7AHEz/gk3PMM5/XswfMjU4uJeMuSw+fOboYTNmqk6zcSMe7ByIweAak/pUDbUObMNtMDY0G5qyH7hkxzzNhtZm0zOWSYdNOMZnyPJnNvN+bL1rOjDHDa1FxsF3zXYNFuOCXLWYGVmAPyv1bYYlV3zXR0kaNLhGx25UdCVUaw30AiWXsxckTX5MONM+a811WEvGhIkh6V3QS+PQ2AtD/MuGpFfUiPjQ1n7JPTYu/boV1KXFI+IryYD8rjsH9b73b+j3dXDuiAbJyYD86s2/B0x4688RE976a8iEt/4YM+GtvwXd4Z9UP0WdXvlT1ANv/CXsgTf+EPfBBx8sxD8SrEB2niv1BAAAAABJRU5ErkJggg=="
+                src={` https://api.dicebear.com/5.x/initials/svg?seed=${snippet?.channelTitle}`}
               />
-              <div className="mx-2">
-                <p className="font-bold">{snippet?.channelTitle}</p>
-                <p>Subscribers</p>
+              <div className="flex flex-row gap-5">
+                <div>
+                  <h2 className="font-semibold">{snippet?.channelTitle} </h2>
+                  <p className="text-xs text-gray-500">
+                    {formatNumber(statistics?.viewCount)} subscribers
+                  </p>
+                </div>
+                <button className="text-white h-fit font-semibold bg-black px-3 py-1 rounded-full transition-all duration-200 hover:bg-red-700">
+                  Subscribe
+                </button>
               </div>
-              <button className="px-4 my-1 ml-2 bg-black text-white rounded-full">
-                Subscribe
-              </button>
             </div>
 
-            <div className="flex">
-              <div className="w-full">
-                <button className=" px-4 py-1  my-1 mx-2 bg-gray-100  rounded-l-full mr-0  border-r-2">
-                  {statistics?.likeCount} likes
-                </button>
-                <button className=" px-4 py-1 my-1 mx-2 bg-gray-100  rounded-r-full ml-0  ">
-                  Dislike
-                </button>
+            {/* features and options */}
+            <div className="flex flex-wrap w-full lg:w-[50%] gap-2">
+              {/* like and unlike */}
+              <div className="flex flex-row bg-slate-100 gap-3 rounded-full px-2 items-center">
+                <abbr
+                  title="i like this"
+                  className="flex flex-row text-semibold cursor-pointer   "
+                  style={{ textDecoration: "none" }}
+                >
+                  <PiThumbsUpThin size={25} className="" />
+                  {formatNumber(statistics?.likeCount)}
+                </abbr>
+                <p className="border-gray-200 border-l border h-[80%] "></p>
+                <abbr title="i dislike this" className="cursor-pointer">
+                  <PiThumbsDownThin size={25} />
+                </abbr>
               </div>
-              <button className="px-4 my-1 mx-2 bg-gray-100 rounded-full ">
-                Share
-              </button>
-              <button className="px-4 my-1 mx-2 bg-gray-100  rounded-full">
-                More
-              </button>
+              {/* share */}
+              <div className="flex flex-row bg-slate-100 gap-3 rounded-full px-3 items-center duration-200 hover:bg-slate-200">
+                <abbr
+                  title="share"
+                  className="flex flex-row text-semibold cursor-pointer font-semibold  items-center gap-2 "
+                  style={{ textDecoration: "none" }}
+                >
+                  <IoMdShareAlt />
+                  <p>Share</p>
+                </abbr>
+              </div>
+
+              {/* Download */}
+              <div className="flex flex-row bg-slate-100 gap-3 rounded-full px-3 py-1 items-center duration-200 hover:bg-slate-200">
+                <abbr
+                  title="Download"
+                  className="flex flex-row text-semibold cursor-pointer font-semibold  items-center gap-2 "
+                  style={{ textDecoration: "none" }}
+                >
+                  <LiaDownloadSolid />
+                  <p>Download</p>
+                </abbr>
+              </div>
+
+              {/* options */}
+              <div className="flex flex-row bg-slate-100 gap-3 rounded-full px-3 py-1 items-center duration-200 hover:bg-slate-200">
+                <div className="flex flex-row text-semibold cursor-pointer  items-center gap-2 ">
+                  <HiDotsHorizontal />
+                </div>
+              </div>
             </div>
           </div>
         </div>
-        <LiveChat />
+
+        {/* discription  */}
+        <div className="bg-richblack text-sm bg-gray-100 rounded-md p-2">
+          <div className="flex flex-row gap-3 text-sm font-semibold">
+            <p>1.4m views </p>
+            <p>3 years ago </p>
+          </div>
+          {showDiscription
+            ? snippet?.description.split("\n")?.map((text, idx) => (
+                <>
+                  <p key={"idx"}> {text} </p>
+                  {text.length == 0 && <br />}
+                </>
+              ))
+            : snippet?.description
+                ?.slice(0, 200)
+                ?.split("\n")
+                ?.map((text, idx) => (
+                  <>
+                    <p key={"idx"}> {text} </p>
+                    {text.length == 0 && <br />}
+                  </>
+                ))}
+          <button
+            className="transition-all rounded-lg hover:bg-gray-300 duration-200 font-semibold"
+            onClick={() => setShowDiscription(!showDiscription)}
+          >
+            {showDiscription ? "...show less" : "...show full"}
+          </button>
+        </div>
+
+        {/* comments */}
+        <div className="space-y-5">
+          <div className="flex font-semibold flex-row justify-between w-[80%] sm:w-[30%]">
+            <div>1.4K Comments</div>
+            <div className="flex flex-row items-center gap-2">
+              <MdSort size={20} />
+              Sort By
+            </div>
+          </div>
+          {commentsList ? (
+            <InfiniteScroll
+              pageStart={commentNextPageToken}
+              loadMore={fetchComment}
+              hasMore={true || false}
+              loader={
+                <div className="loader" key={0}>
+                  <Loader />
+                </div>
+              }
+            >
+              <div className="space-y-3">
+                {commentsList.map((comment, idx) => (
+                  <Comments
+                    comment={comment?.snippet?.topLevelComment}
+                    replies={comment?.replies}
+                    totalReply={comment?.snippet?.totalReplyCount}
+                  />
+                ))}
+              </div>
+            </InfiniteScroll>
+          ) : (
+            <div>Comments are off</div>
+          )}
+        </div>
       </div>
-      <CommentContainer />
+      <div className="col-span-1"></div>
     </div>
+  ) : (
+    ""
   );
 };
 
