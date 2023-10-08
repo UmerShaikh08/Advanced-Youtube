@@ -4,12 +4,13 @@ import { Live_Msg_Count } from "./constants";
 const chatSlice = createSlice({
   name: "chat",
   initialState: {
-    massage: [],
+    chat: [],
   },
   reducers: {
     addItem: (state, action) => {
-      state.massage.splice(Live_Msg_Count);
-      state.massage.unshift(action.payload);
+      state.chat.splice(Live_Msg_Count);
+      const data = action.payload;
+      state.chat.unshift(...data);
     },
   },
 });

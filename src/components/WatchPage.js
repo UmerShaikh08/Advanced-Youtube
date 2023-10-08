@@ -1,7 +1,7 @@
 import React, { useEffect, useRef, useState } from "react";
 import { closeMenu } from "../utils/appSlice";
 import { useDispatch } from "react-redux";
-import { useSearchParams, useParams } from "react-router-dom";
+import { useSearchParams, useParams, Link } from "react-router-dom";
 
 import { BiDislike, BiLike } from "react-icons/bi";
 import { IoMdShareAlt } from "react-icons/io";
@@ -17,6 +17,10 @@ import Comments from "./Video/Comments";
 import InfiniteScroll from "react-infinite-scroller";
 import { PiThumbsUpThin, PiThumbsDownThin } from "react-icons/pi";
 import Loader from "./shimmer/Loader";
+import { API_KEY } from "../utils/constants";
+import Recommend from "./Video/Recommend";
+import RecommendCardShimmer from "./shimmer/RecommendCardShimmer";
+import LiveMessage from "./Video/LiveMessage";
 
 const WatchPage = () => {
   const dispatch = useDispatch();
@@ -35,12 +39,16 @@ const WatchPage = () => {
   const [commentsList, setCommentsList] = useState(null);
   const [commentsData, setcommentsData] = useState(null);
   const [commentNextPageToken, setCommentNextPageToken] = useState(null);
+  const [recommendtNextPageToken, setRecommendtNextPageToken] = useState(null);
+  const [title, setTitle] = useState(null);
+  const [recommenedVideos, setRecommenedVideos] = useState(null);
 
   const getVideos = async () => {
     const data = await fetch(
-      `https://youtube.googleapis.com/youtube/v3/videos?part=snippet%2CcontentDetails%2Cstatistics&id=${id}&key=AIzaSyDxVXObkzSu9WSwil2XIIqm4hZKvkRNVKU`
+      `https://youtube.googleapis.com/youtube/v3/videos?part=snippet%2CcontentDetails%2Cstatistics&id=${id}&key=${process.env.REACT_APP_KEY}`
     );
     const json = await data.json();
+    console.log(json);
     setVideo(json?.items[0]);
 
     if (json.items[0]?.snippet) {
@@ -50,17 +58,22 @@ const WatchPage = () => {
     if (json.items[0]?.statistics) {
       setStatistics(json.items[0]?.statistics);
     }
+
+    if (json?.items[0]?.snippet?.title) {
+      setTitle(json?.items[0]?.snippet?.channelTitle);
+    }
+    // console.log("playing video", json);
   };
 
   useEffect(() => {
     getVideos();
-  }, []);
+  }, [id]);
 
   // fetching comments api data
   // comments are infinite after some comments its fetching random commentsr
   const fetchComment = async () => {
     const data = await fetch(
-      `https://youtube.googleapis.com/youtube/v3/commentThreads?part=snippet%2Creplies&order=relevance&pageToken=${commentNextPageToken}&videoId=_VB39Jo8mAQ&key=${process.env.REACT_APP_KEY}`
+      `https://youtube.googleapis.com/youtube/v3/commentThreads?part=snippet%2Creplies&maxResults=10&order=relevance&pageToken=${commentNextPageToken}&videoId=_VB39Jo8mAQ&key=${process.env.REACT_APP_KEY}`
     );
     const json = await data?.json();
 
@@ -78,46 +91,100 @@ const WatchPage = () => {
       setCommentNextPageToken(null);
     }
 
-    console.log(json);
+    // console.log(json);
   };
 
   useEffect(() => {
     const firstFetchComment = async () => {
-      const data = await fetch(
-        `https://youtube.googleapis.com/youtube/v3/commentThreads?part=snippet%2Creplies&order=relevance&videoId=${id}&key=${process.env.REACT_APP_KEY}`
-      );
-      const json = await data?.json();
+      try {
+        const data = await fetch(
+          `https://youtube.googleapis.com/youtube/v3/commentThreads?part=snippet%2Creplies&maxResults=10&order=relevance&videoId=${id}&key=${process.env.REACT_APP_KEY}`
+        );
+        const json = await data?.json();
 
-      if (json) setcommentsData(json);
+        if (json) setcommentsData(json);
+
+        if (json?.items) {
+          setCommentsList(json?.items);
+        }
+
+        if (json?.nextPageToken) {
+          setCommentNextPageToken(json?.nextPageToken);
+        }
+
+        // console.log(json);
+      } catch (error) {
+        console.log(error);
+      }
+    };
+    firstFetchComment();
+  }, [id]);
+
+  const fetchRecommenedVideos = async () => {
+    try {
+      console.log("hiiii");
+      const data = await fetch(
+        `https://youtube.googleapis.com/youtube/v3/search?part=snippet&maxResults=25&pageToken=${recommendtNextPageToken}&q={title}&key=${process.env.REACT_APP_KEY}&brandingSettings`
+      );
+      const json = await data.json();
 
       if (json?.items) {
-        setCommentsList(json?.items);
+        setRecommenedVideos((prev) =>
+          prev ? [...prev, ...json?.items] : json?.items
+        );
       }
 
       if (json?.nextPageToken) {
-        setCommentNextPageToken(json?.nextPageToken);
+        setRecommendtNextPageToken(json?.nextPageToken);
       }
+      // console.log("recommended videos ", json);
+    } catch (error) {
+      console.log(error);
+    }
+  };
+  // recommenedvideos
+  useEffect(() => {
+    const firstFetchRecommenedVideos = async () => {
+      try {
+        const data = await fetch(
+          `https://youtube.googleapis.com/youtube/v3/search?part=snippet&contentDetails&maxResults=25&q=${title}&key=${process.env.REACT_APP_KEY}&brandingSettings`
+        );
+        const json = await data.json();
 
-      console.log(json);
+        if (json?.items) {
+          setRecommenedVideos(json?.items);
+        }
+
+        if (json?.nextPageToken) {
+          setRecommendtNextPageToken(json?.nextPageToken);
+        }
+        console.log("recommended videos ", json);
+      } catch (error) {
+        console.log(error);
+      }
     };
-    firstFetchComment();
-  }, []);
+
+    if (title) {
+      firstFetchRecommenedVideos();
+    }
+  }, [title, id]);
 
   return video ? (
-    <div className="grid grid-cols-1 lg:grid-cols-3 w-screen sm:w-11/12 overflow-hidden mx-auto">
-      <div className="col-span-2 aspect-video rounded-lg space-y-4 ">
-        <ReactPlayer
-          controls={true}
-          width="100%"
-          height="100%"
-          config={{
-            youtube: {
-              playerVars: { showinfo: 1 },
-            },
-          }}
-          url={`https://www.youtube.com/watch?v=${id}`}
-        />
-
+    <div className="grid grid-cols-1 lg:grid-cols-3 gap-2 w-screen sm:w-11/12 overflow-x-hidden mx-auto">
+      <div className="col-span-2  rounded-lg space-y-4 ">
+        <div className=" sm:rounded-md w-full aspect-video overflow-hidden ">
+          <ReactPlayer
+            controls={true}
+            width="100%"
+            height="100%"
+            config={{
+              youtube: {
+                playerVars: { showinfo: 1 },
+              },
+            }}
+            url={`https://www.youtube.com/watch?v=${id}`}
+          />
+        </div>
         {/* video title  */}
         <div className="space-y-2 mx-2 sm:mx-0">
           <h1 className="font-semibold text-xl">{snippet?.title}</h1>
@@ -219,7 +286,7 @@ const WatchPage = () => {
             className="transition-all rounded-lg hover:bg-gray-300 duration-200 font-semibold"
             onClick={() => setShowDiscription(!showDiscription)}
           >
-            {showDiscription ? "...show less" : "...show full"}
+            {showDiscription ? "...show less" : "...More"}
           </button>
         </div>
 
@@ -258,7 +325,40 @@ const WatchPage = () => {
           )}
         </div>
       </div>
-      <div className="col-span-1"></div>
+
+      {recommenedVideos ? (
+        <div className="hidden lg:block w-full">
+          <InfiniteScroll
+            pageStart={recommendtNextPageToken}
+            loadMore={fetchRecommenedVideos}
+            hasMore={true || false}
+            loader={
+              <div className="loader" key={0}>
+                <RecommendCardShimmer />
+              </div>
+            }
+          >
+            {snippet?.liveBroadcastContent === "live" && (
+              <LiveMessage video={video} />
+            )}
+            <div className="hidden  col-span-1 mt-5 lg:flex flex-col gap-3">
+              {recommenedVideos?.map(
+                (video, idx) =>
+                  video?.id?.kind !== "youtube#channel" &&
+                  idx !== 0 && (
+                    <Link to={"/watch/" + video?.id?.videoId} key={idx}>
+                      <Recommend video={video} />
+                    </Link>
+                  )
+              )}
+            </div>
+          </InfiniteScroll>
+        </div>
+      ) : (
+        <div className="hidden lg:block col-span-1 space-y-3">
+          <div>Recommend Videos Not Found</div>
+        </div>
+      )}
     </div>
   ) : (
     ""

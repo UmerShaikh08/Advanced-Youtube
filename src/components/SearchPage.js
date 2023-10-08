@@ -14,7 +14,7 @@ const SearchPage = () => {
   const getVideos = async () => {
     try {
       const data = await fetch(
-        `https://youtube.googleapis.com/youtube/v3/search?part=snippet&contentDetails&maxResults=25&q=${id}&key=${API_KEY}&brandingSettings`
+        `https://youtube.googleapis.com/youtube/v3/search?part=snippet&contentDetails&maxResults=25&q=${id}&key=${process.env.REACT_APP_KEY}&brandingSettings`
       );
       const json = await data.json();
       console.log("json", json);
