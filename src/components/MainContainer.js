@@ -1,11 +1,10 @@
 import React from "react";
-import ButtonList from "./ButtonList";
-import VideoContainer from "./VideoContainer";
-import { useSelector } from "react-redux";
+import ButtonList from "./common/ButtonList";
+import VideoContainer from "./home/VideoContainer";
 
 const MainContainer = () => {
   return (
-    <div className=" flex flex-row mx-auto w-full mt-20 ">
+    <div className=" flex flex-row mx-auto w-full  ">
       <div className="w-11/12 mx-auto  ">
         <ButtonList />
         <VideoContainer />

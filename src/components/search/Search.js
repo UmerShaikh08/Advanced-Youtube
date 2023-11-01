@@ -1,14 +1,25 @@
 import React from "react";
-import { formatDate } from "../utils/formdate";
+import { formatDate } from "../../utils/formdate";
+import { HiMiniSignal } from "react-icons/hi2";
 
 const Search = ({ id, snippet }) => {
   return id?.kind === "youtube#video" ? (
     <div className="flex  flex-col  md:flex-row w-full gap-2 md:gap-5  overflow-x-hidden ">
-      <div className="">
+      <div className="relative">
         <img
-          src={snippet?.thumbnails?.medium?.url}
-          className="  md:rounded-md min-w-[95vw]    md:max-w-[250px]  md:min-w-[350px]"
+          src={
+            snippet?.thumbnails?.high?.url
+              ? snippet?.thumbnails?.high?.url
+              : snippet?.thumbnails?.medium?.url
+          }
+          className="w-full md:rounded-md min-w-[95vw]  max-h-[180px]  object-cover  md:max-w-[250px]  md:min-w-[350px]"
         />
+        {snippet?.liveBroadcastContent === "live" && (
+          <div className="bg-[#D11919] w-fit flex flex-row gap-1 items-center absolute text-sm rounded-md right-[3%] bottom-[3%]  px-1  text-white">
+            <HiMiniSignal />
+            LIVE
+          </div>
+        )}
       </div>
 
       {/* deskstop view */}

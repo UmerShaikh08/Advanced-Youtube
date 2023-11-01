@@ -13,12 +13,6 @@ const SearchShimmer = () => {
       <SearchShimmerCard />
       <SearchShimmerCard />
       <SearchShimmerCard />
-      <SearchShimmerCard />
-      <SearchShimmerCard />
-      <SearchShimmerCard />
-      <SearchShimmerCard />
-      <SearchShimmerCard />
-      <SearchShimmerCard />
     </div>
   );
 };

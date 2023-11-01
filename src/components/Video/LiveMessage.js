@@ -47,7 +47,7 @@ const LiveMessage = ({ video }) => {
       if (commentId) {
         FetchChat();
       }
-    }, 2000);
+    }, 1000);
 
     return () => clearInterval(interval);
   }, [commentId, id]);

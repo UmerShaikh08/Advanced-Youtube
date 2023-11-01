@@ -1,10 +1,10 @@
 import React, { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { toggleMenu } from "../utils/appSlice";
-import { SUGGESTION_API } from "../utils/constants";
-import searchLogo from "../img/search.svg";
-import { cacheResult } from "../utils/searchSlice";
-import { Link, NavLink, useNavigate } from "react-router-dom";
+import { toggleMenu } from "../../utils/appSlice";
+import { SUGGESTION_API } from "../../utils/constants";
+import searchLogo from "../../img/search.svg";
+import { cacheResult } from "../../utils/searchSlice";
+import { useNavigate } from "react-router-dom";
 import { IoLogoYoutube } from "react-icons/io";
 
 const Head = () => {
@@ -20,6 +20,7 @@ const Head = () => {
   };
 
   const setSuggestionData = async () => {
+    console.log("search query", SearchQuery);
     const data = await fetch(SUGGESTION_API + SearchQuery);
     const json = await data.json();
 

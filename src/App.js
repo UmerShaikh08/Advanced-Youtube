@@ -1,12 +1,12 @@
 import { Provider } from "react-redux";
 import "./App.css";
-import Head from "./components/Head";
 import Body from "./components/Body";
 import store from "./utils/Store";
 import { Route, Routes } from "react-router-dom";
-import WatchPage from "./components/WatchPage";
-import SearchPage from "./components/SearchPage";
+import WatchPage from "./components/Video/WatchPage";
+import SearchPage from "./components/search/SearchPage";
 import MainContainer from "./components/MainContainer";
+import Head from "./components/common/Head";
 
 function App() {
   return (

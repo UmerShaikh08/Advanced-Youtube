@@ -2,8 +2,8 @@ import React, { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import Search from "./Search";
 import { Link } from "react-router-dom";
-import SearchShimmer from "./shimmer/SearchShimmer";
-import { API_KEY } from "../utils/constants";
+import SearchShimmer from "../shimmer/SearchShimmer";
+import { API_KEY } from "../../utils/constants";
 import InfiniteScroll from "react-infinite-scroller";
 
 const SearchPage = () => {
@@ -11,27 +11,41 @@ const SearchPage = () => {
   const [searchVideos, setSearchVideos] = useState([]);
   const [nextPageToken, setNextPageToken] = useState("");
 
-  const getVideos = async () => {
+  const getVideos = async (newSearch) => {
     try {
-      const data = await fetch(
-        `https://youtube.googleapis.com/youtube/v3/search?part=snippet&contentDetails&maxResults=25&q=${id}&key=${process.env.REACT_APP_KEY}&brandingSettings`
-      );
+      if (nextPageToken === null) return;
+
+      let data = null;
+
+      if (nextPageToken) {
+        // infinite scroll
+        data = await fetch(
+          `https://youtube.googleapis.com/youtube/v3/search?part=snippet&contentDetails&maxResults=25&pageToken=${nextPageToken}&q=${id}&key=${process.env.REACT_APP_KEY}&brandingSettings`
+        );
+      } else {
+        // first render
+        data = await fetch(
+          `https://youtube.googleapis.com/youtube/v3/search?part=snippet&contentDetails&maxResults=25&q=${id}&key=${process.env.REACT_APP_KEY}&brandingSettings`
+        );
+      }
       const json = await data.json();
       console.log("json", json);
       if (!json?.error) {
         setSearchVideos((prev) =>
-          prev ? [...prev, ...json?.items] : json?.items
+          prev && !newSearch ? [...prev, ...json?.items] : json?.items
         );
       }
-      if (json?.nextPageToken) {
+      if (json.nextPageToken) {
         setNextPageToken(json?.nextPageToken);
+      } else {
+        setNextPageToken(null);
       }
     } catch (error) {
       console.log("Failed to display video --->", error);
     }
   };
   useEffect(() => {
-    getVideos();
+    getVideos(true);
   }, [id]);
 
   return searchVideos?.length === 0 ? (
@@ -39,8 +53,8 @@ const SearchPage = () => {
   ) : (
     <InfiniteScroll
       pageStart={nextPageToken}
-      loadMore={getVideos}
-      hasMore={true || false}
+      loadMore={() => getVideos(false)}
+      hasMore={nextPageToken || false}
       loader={
         <div className="loader w-full" key={0}>
           <SearchShimmer />

@@ -1,34 +1,29 @@
 import React, { useEffect, useRef, useState } from "react";
-import { closeMenu } from "../utils/appSlice";
+import { closeMenu } from "../../utils/appSlice";
 import { useDispatch } from "react-redux";
-import { useSearchParams, useParams, Link } from "react-router-dom";
+import { useParams, Link } from "react-router-dom";
 
-import { BiDislike, BiLike } from "react-icons/bi";
 import { IoMdShareAlt } from "react-icons/io";
 import { LiaDownloadSolid } from "react-icons/lia";
 import { HiDotsHorizontal } from "react-icons/hi";
 import { MdSort } from "react-icons/md";
 
 import "video-react/dist/video-react.css";
-import { Player } from "video-react";
 import ReactPlayer from "react-player";
-import { formatNumber } from "../utils/formatNumber";
-import Comments from "./Video/Comments";
+import { formatNumber } from "../../utils/formatNumber";
+import Comments from "./Comments";
 import InfiniteScroll from "react-infinite-scroller";
 import { PiThumbsUpThin, PiThumbsDownThin } from "react-icons/pi";
-import Loader from "./shimmer/Loader";
-import { API_KEY } from "../utils/constants";
-import Recommend from "./Video/Recommend";
-import RecommendCardShimmer from "./shimmer/RecommendCardShimmer";
-import LiveMessage from "./Video/LiveMessage";
+import Loader from "../shimmer/Loader";
+import Recommend from "./Recommend";
+import RecommendCardShimmer from "../shimmer/RecommendCardShimmer";
+import LiveMessage from "./LiveMessage";
 
 const WatchPage = () => {
   const dispatch = useDispatch();
   useEffect(() => {
     dispatch(closeMenu());
   }, []);
-
-  const VideoPlayerRef = useRef(null);
 
   const { id } = useParams();
 
@@ -210,7 +205,7 @@ const WatchPage = () => {
             </div>
 
             {/* features and options */}
-            <div className="flex flex-wrap w-full lg:w-[50%] gap-2">
+            <div className="flex flex-wrap  lg:w-[50%] gap-2">
               {/* like and unlike */}
               <div className="flex flex-row bg-slate-100 gap-3 rounded-full px-2 items-center">
                 <abbr
@@ -219,7 +214,7 @@ const WatchPage = () => {
                   style={{ textDecoration: "none" }}
                 >
                   <PiThumbsUpThin size={25} className="" />
-                  {formatNumber(statistics?.likeCount)}
+                  {statistics?.likeCount && formatNumber(statistics?.likeCount)}
                 </abbr>
                 <p className="border-gray-200 border-l border h-[80%] "></p>
                 <abbr title="i dislike this" className="cursor-pointer">
@@ -303,7 +298,7 @@ const WatchPage = () => {
             <InfiniteScroll
               pageStart={commentNextPageToken}
               loadMore={fetchComment}
-              hasMore={true || false}
+              hasMore={commentNextPageToken || false}
               loader={
                 <div className="loader" key={0}>
                   <Loader />
